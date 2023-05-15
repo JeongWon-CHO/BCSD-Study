@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public Rigidbody BusinessMan; // 추가한 부분
+
     public Animator anim;
     public AudioSource[] sound;
     public GameManager gameManager;
@@ -16,6 +18,24 @@ public class Player : MonoBehaviour
         anim = gameObject.GetComponent<Animator>();
         //money = dslManager.GetMoney();
     }
+
+   
+  
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.RightArrow) == true)
+        {
+            transform.Translate(new Vector2(-0.59f, 0.33f));
+        }
+        if (Input.GetKeyDown(KeyCode.LeftArrow) == true)
+        {
+            transform.Translate(new Vector2(0.59f, 0.33f));
+            //transform.Translate(Vector3.right * Time.deltaTime);
+        }
+
+    }
+
+
 
     public void Climb(bool isChange)
     {
