@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+
 public class GameManager : MonoBehaviour
 {
+    // public static GameManager Inst = null;   -> 싱글톤 패턴을 위한 객체 정의
+
     public Player player;
     public ObjectManager objectManager;
     //public DSLManager dslManager;
@@ -23,28 +26,40 @@ public class GameManager : MonoBehaviour
     float gaugeRedcutionRate = 0.0025f;
     public bool[] IsChangeDir = new bool[20];
 
+    
+
     Vector3 beforePos,
     // startPos = new Vector3(-0.8f, -1.5f, 0),
     startPos = new Vector3(-0.8f, -6.2f, 0),
     //leftPos = new Vector3(-0.8f, 0.4f, 0),
     //rightPos = new Vector3(0.8f, 0.4f, 0),
-    leftPos = new Vector3(-1.1f, 0.68f, 0),
-    rightPos = new Vector3(1.2f, 0.68f, 0),
+    leftPos = new Vector3(-1.1f, 0.68f, 0), // 계단 배치 위치
+    rightPos = new Vector3(1.2f, 0.68f, 0), // 계단 배치 위치
     // leftDir = new Vector3(0.8f, -0.4f, 0),
     // rightDir = new Vector3(-0.8f, -0.4f, 0);
-    leftDir = new Vector3(0.8f, -0.4f, 0),
-    rightDir = new Vector3(-0.8f, -0.4f, 0);
-
-    enum State { start, leftDir, rightDir }
-    State state = State.start;
+    leftDir = new Vector3(6.0f, -4.0f, 0),
+    rightDir = new Vector3(-6.0f, -4.0f, 0);
+    
+    public enum State { start, leftDir, rightDir }
+    public static State state = State.start;
 
 
     void Awake()
     {
+        // 싱글톤 패턴을 위한 ㅇㅇ
+        //if (Inst == null)
+        //{
+        //    Inst = this;
+        //    DontDestroyOnLoad(this.gameObject);
+        //}
+        //else Destroy(this.gameObject);
+
+
         players[selectedIndex].SetActive(true);
         player = players[selectedIndex].GetComponent<Player>();
 
         StairsInit();
+        
         GaugeReduce();
         StartCoroutine("CheckGauge");
 
@@ -56,8 +71,23 @@ public class GameManager : MonoBehaviour
     //Initially Spawn The Stairs
     void StairsInit() // Awake 함수에서 StairsInit 함수를 선언하여 게임 시작 처음 계단들을 랜덤으로 스폰
     {
+        
+
         for (int i = 0; i < 20; i++)
         {
+
+            if (i != 0)
+            {
+                if (Random.Range(0, 2) == 0) // 왼쪽이 1
+                {
+                    state = State.rightDir;
+                }
+                else
+                {
+                    state = State.leftDir;
+                }
+            }
+
             switch (state)
             {
                 case State.start:
@@ -71,19 +101,28 @@ public class GameManager : MonoBehaviour
                     stairs[i].transform.position = beforePos + rightPos;
                     break;
             }
+
             beforePos = stairs[i].transform.position;
 
+            
+
+            
             if (i != 0)
             {
                 //Coin object activation according to random probability
-                if (Random.Range(1, 9) < 3) objectManager.MakeObj("coin", i);
+                if (Random.Range(1, 9) < 3) 
+                    objectManager.MakeObj("coin", i);
                 if (Random.Range(1, 9) < 3 && i < 19)
                 {
-                    if (state == State.leftDir) state = State.rightDir;
-                    else if (state == State.rightDir) state = State.leftDir;
+                    if (state == State.leftDir) 
+                        state = State.rightDir;
+                    else if (state == State.rightDir) 
+                        state = State.leftDir;
+
                     IsChangeDir[i + 1] = true;
                 }
             }
+            
         }
     }
 
@@ -91,10 +130,11 @@ public class GameManager : MonoBehaviour
 
 
     //Spawn The Stairs At The Random Location
-    void SpawnStair(int num)
+    void SpawnStair(int num) // 스폰할 하나의 계단 오브젝트의 인덱스를 매개변수로 받아 적절한 위치에 스폰
     {
         IsChangeDir[num + 1 == 20 ? 0 : num + 1] = false;
         beforePos = stairs[num == 0 ? 19 : num - 1].transform.position;
+        
         switch (state)
         {
             case State.leftDir:
@@ -105,6 +145,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        
         //Coin object activation according to random probability
         if (Random.Range(1, 9) < 3) objectManager.MakeObj("coin", num);
         if (Random.Range(1, 9) < 3)
@@ -113,12 +154,13 @@ public class GameManager : MonoBehaviour
             else if (state == State.rightDir) state = State.leftDir;
             IsChangeDir[num + 1 == 20 ? 0 : num + 1] = true;
         }
+        
     }
 
 
 
     //Stairs Moving Along The Direction       
-    public void StairMove(int stairIndex, bool isChange, bool isleft)
+    public void StairMove(int stairIndex, bool isChange, bool isleft) // 플레이어가 버튼을 누를 때마다 계단의 위치가 움직이도록 함
     {
         if (player.isDie) return;
 
@@ -131,13 +173,14 @@ public class GameManager : MonoBehaviour
 
         //Move the stairs below a certain height
         for (int i = 0; i < 20; i++)
-            // if (stairs[i].transform.position.y < -5) SpawnStair(i
-            if (stairs[i].transform.position.y < -10) SpawnStair(i);
+            //if (stairs[i].transform.position.y < -5) SpawnStair(i);
+            if (stairs[i].transform.position.y < -10) 
+                SpawnStair(i);
 
         //Game over if climbing stairs is wrong
         if (IsChangeDir[stairIndex] != isChange)
         {
-            //GameOver();
+            GameOver();
             return;
         }
 
@@ -169,7 +212,7 @@ public class GameManager : MonoBehaviour
         Invoke("GaugeReduce", 0.01f);
     }
 
-    /*
+    
     IEnumerator CheckGauge()
     {
         while (gauge.fillAmount != 0)
@@ -187,18 +230,18 @@ public class GameManager : MonoBehaviour
         player.anim.SetBool("Die", true);
 
         //UI
-        ShowScore();
+        //ShowScore();
         pauseBtn.SetActive(false);
 
         player.isDie = true;
         player.MoveAnimation();
-        if (vibrationOn) Vibration();
-        dslManager.SaveMoney(player.money);
+        //if (vibrationOn) Vibration();
+        //dslManager.SaveMoney(player.money);
 
         CancelInvoke();  //GaugeBar Stopped      
         Invoke("DisableUI", 1.5f);
     }
-    */
+    
 
 
 

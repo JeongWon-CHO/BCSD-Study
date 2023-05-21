@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    private bool isMovingRight = true;
+
     public Rigidbody BusinessMan; // 추가한 부분
 
     public Animator anim;
@@ -23,14 +25,36 @@ public class Player : MonoBehaviour
   
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightArrow) == true)
+
+        // 기본값 : 0.59f 기준으로 짜긴함 0.33f랑
+
+        if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            transform.Translate(new Vector2(-0.59f, 0.33f));
+            // 오른쪽으로 이동
+            if (isMovingRight == true)
+                transform.Translate(new Vector2(-0.58f, 0.33f));
+            else
+                transform.Translate(new Vector2(0.58f, 0.33f));
+
+            
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow) == true)
+
+        // 왼쪽 방향키 입력 감지
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            transform.Translate(new Vector2(0.59f, 0.33f));
-            //transform.Translate(Vector3.right * Time.deltaTime);
+            // 방향 전환
+            isMovingRight = !isMovingRight;
+
+            // 방향 전환에 따라 플레이어 스케일 반전
+            Vector3 scale = transform.localScale;
+            scale.x *= -1;
+            //transform.localScale = scale;
+
+            if (isMovingRight == true)
+                transform.Translate(new Vector2(-0.49f, 0.34f));
+            else
+                transform.Translate(new Vector2(0.59f, 0.34f));
+
         }
 
     }
@@ -39,9 +63,11 @@ public class Player : MonoBehaviour
 
     public void Climb(bool isChange)
     {
-        if (isChange) isleft = !isleft;
+        if (isChange) 
+            isleft = !isleft;
         gameManager.StairMove(stairIndex, isChange, isleft);
-        if ((++stairIndex).Equals(20)) stairIndex = 0;
+        if ((++stairIndex).Equals(20)) 
+            stairIndex = 0;
         MoveAnimation();
         gameManager.gaugeStart = true;
     }
