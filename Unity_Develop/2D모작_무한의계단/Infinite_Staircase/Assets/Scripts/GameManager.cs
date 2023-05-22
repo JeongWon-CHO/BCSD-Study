@@ -37,8 +37,8 @@ public class GameManager : MonoBehaviour
     rightPos = new Vector3(1.2f, 0.68f, 0), // 계단 배치 위치
     // leftDir = new Vector3(0.8f, -0.4f, 0),
     // rightDir = new Vector3(-0.8f, -0.4f, 0);
-    leftDir = new Vector3(6.0f, -4.0f, 0),
-    rightDir = new Vector3(-6.0f, -4.0f, 0);
+    leftDir = new Vector3(0.8f, -4.0f, 0),
+    rightDir = new Vector3(-0.8f, -4.0f, 0);
     
     public enum State { start, leftDir, rightDir }
     public static State state = State.start;
@@ -61,7 +61,10 @@ public class GameManager : MonoBehaviour
         StairsInit();
         
         GaugeReduce();
-        StartCoroutine("CheckGauge");
+        //StartCoroutine("CheckGauge");
+        
+            
+
 
         //UI[0].SetActive(dslManager.IsRetry());
         //UI[1].SetActive(!dslManager.IsRetry());
@@ -106,7 +109,7 @@ public class GameManager : MonoBehaviour
 
             
 
-            
+            /*
             if (i != 0)
             {
                 //Coin object activation according to random probability
@@ -122,6 +125,7 @@ public class GameManager : MonoBehaviour
                     IsChangeDir[i + 1] = true;
                 }
             }
+            */
             
         }
     }
@@ -167,8 +171,10 @@ public class GameManager : MonoBehaviour
         //Move stairs to the right or left
         for (int i = 0; i < 20; i++)
         {
-            if (isleft) stairs[i].transform.position += leftDir;
-            else stairs[i].transform.position += rightDir;
+            if (isleft)
+                stairs[i].transform.position += leftDir;
+            else 
+                stairs[i].transform.position += rightDir;
         }
 
         //Move the stairs below a certain height
@@ -192,6 +198,73 @@ public class GameManager : MonoBehaviour
             new Vector3(0, 4.7f, 0) : new Vector3(0, -0.05f, 0);
         */
     }
+
+
+
+    public void StairMoving()
+    {
+
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+
+            if (player.isleft)
+            {
+                for (int i = 0; i < 20; i++) 
+                    stairs[i].transform.position += leftDir;
+            }
+            else
+            {
+                for (int i = 0; i < 20; i++) 
+                    stairs[i].transform.position += rightDir;
+            }
+
+        }
+
+        /*
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            if (stairs[i].transform.position.y < -1)
+            {
+                for (int i = 0; i < 20; i++)
+                {
+                    SpawnStair(i);
+                }
+            }
+
+                for (int i = 0; i < 20; i++)
+            {
+                {
+                    if (stairs[i].transform.position.y < -1) SpawnStair(i);
+                }
+            }
+        }
+        */
+
+
+
+
+            for (int i = 0; i < 20; i++)
+        {
+
+            if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                stairs[i].transform.position += leftDir;
+            }
+            else
+                stairs[i].transform.position += rightDir;
+
+        }
+
+        for (int i = 0; i < 20; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                if (stairs[i].transform.position.y < -1) SpawnStair(i);
+            }
+        }
+    }
+
+
 
 
     //#.Gauge

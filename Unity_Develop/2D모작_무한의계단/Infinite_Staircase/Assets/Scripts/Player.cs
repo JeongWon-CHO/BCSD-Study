@@ -25,18 +25,22 @@ public class Player : MonoBehaviour
   
     private void Update()
     {
-
         // 기본값 : 0.59f 기준으로 짜긴함 0.33f랑
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             // 오른쪽으로 이동
             if (isMovingRight == true)
+            {
                 transform.Translate(new Vector2(-0.58f, 0.33f));
+                gameManager.StairMoving();
+            }
             else
+            {
                 transform.Translate(new Vector2(0.58f, 0.33f));
+                gameManager.StairMoving();
+            }
 
-            
         }
 
         // 왼쪽 방향키 입력 감지
@@ -60,14 +64,17 @@ public class Player : MonoBehaviour
     }
 
 
-
+    
     public void Climb(bool isChange)
     {
         if (isChange) 
             isleft = !isleft;
+
         gameManager.StairMove(stairIndex, isChange, isleft);
+
         if ((++stairIndex).Equals(20)) 
             stairIndex = 0;
+
         MoveAnimation();
         gameManager.gaugeStart = true;
     }

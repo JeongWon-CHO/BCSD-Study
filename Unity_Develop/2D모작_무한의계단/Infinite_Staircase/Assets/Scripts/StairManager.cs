@@ -11,6 +11,11 @@ public class StairManager : MonoBehaviour
     private GameObject[] stairs;  // 생성된 계단들의 배열
     private int currentStairIndex = 0;  // 현재 플레이어가 위치한 계단 인덱스
 
+
+    
+    
+
+
     private void Start()
     {
         // 초기 계단 생성
