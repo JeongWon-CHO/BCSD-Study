@@ -59,6 +59,7 @@ public class Player : MonoBehaviour
             else
                 transform.Translate(new Vector2(0.59f, 0.34f));
 
+
         }
 
     }

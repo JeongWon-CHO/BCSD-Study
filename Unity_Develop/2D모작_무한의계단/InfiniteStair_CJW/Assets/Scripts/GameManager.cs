@@ -1,16 +1,12 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-
-public class GameManager : MonoBehaviour
-{
-    // public static GameManager Inst = null;   -> ΩÃ±€≈Ê ∆–≈œ¿ª ¿ß«— ∞¥√º ¡§¿«
-
+public class GameManager : MonoBehaviour {
     public Player player;
     public ObjectManager objectManager;
-    //public DSLManager dslManager;
+    public DSLManager dslManager;
     public DontDestory dontDestory;
     public GameObject[] players, stairs, UI;
     public GameObject pauseBtn, backGround;
@@ -23,76 +19,50 @@ public class GameManager : MonoBehaviour
 
     int score, sceneCount, selectedIndex;
     public bool gaugeStart = false, vibrationOn = true, isGamePaused = false;
-    float gaugeRedcutionRate = 0.0025f;
+    float gaugeRedcutionRate = 0.0015f; //0.0025f
     public bool[] IsChangeDir = new bool[20];
 
-    
-
     Vector3 beforePos,
-    // startPos = new Vector3(-0.8f, -1.5f, 0),
-    startPos = new Vector3(-0.8f, -6.2f, 0),
-    //leftPos = new Vector3(-0.8f, 0.4f, 0),
-    //rightPos = new Vector3(0.8f, 0.4f, 0),
-    leftPos = new Vector3(-1.1f, 0.68f, 0), // ∞Ë¥‹ πËƒ° ¿ßƒ°
-    rightPos = new Vector3(1.2f, 0.68f, 0), // ∞Ë¥‹ πËƒ° ¿ßƒ°
-    // leftDir = new Vector3(0.8f, -0.4f, 0),
-    // rightDir = new Vector3(-0.8f, -0.4f, 0);
-    leftDir = new Vector3(0.8f, -4.0f, 0),
-    rightDir = new Vector3(-0.8f, -4.0f, 0);
-    
-    public enum State { start, leftDir, rightDir }
-    public static State state = State.start;
+    startPos = new Vector3(-0.8f, -1.5f, 0),
+    leftPos = new Vector3(-0.8f, 0.4f, 0),
+    rightPos = new Vector3(0.8f, 0.4f, 0),
+    leftDir = new Vector3(0.8f, -0.4f, 0),
+    rightDir = new Vector3(-0.8f, -0.4f, 0);
+
+    enum State { start, leftDir, rightDir }
+    State state = State.start;
 
 
-    void Awake()
-    {
-        // ΩÃ±€≈Ê ∆–≈œ¿ª ¿ß«— §∑§∑
-        //if (Inst == null)
-        //{
-        //    Inst = this;
-        //    DontDestroyOnLoad(this.gameObject);
-        //}
-        //else Destroy(this.gameObject);
-
-
+    void Awake() {
         players[selectedIndex].SetActive(true);
         player = players[selectedIndex].GetComponent<Player>();
 
         StairsInit();
-        
         GaugeReduce();
-        //StartCoroutine("CheckGauge");
-        Debug.Log("√‚∑¬µ !");
+        StartCoroutine("CheckGauge");
 
-
-
-        //UI[0].SetActive(dslManager.IsRetry());
-        //UI[1].SetActive(!dslManager.IsRetry());
+        UI[0].SetActive(dslManager.IsRetry());
+        UI[1].SetActive(!dslManager.IsRetry());        
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            player.Climb(false);
+        }
+
+        // ÏôºÏ™Ω Î∞©Ìñ•ÌÇ§ ÏûÖÎ†• Í∞êÏßÄ
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            player.Climb(true);
+        }
+    }
 
     //Initially Spawn The Stairs
-    void StairsInit() // Awake «‘ºˆø°º≠ StairsInit «‘ºˆ∏¶ º±æ«œø© ∞‘¿” Ω√¿€ √≥¿Ω ∞Ë¥‹µÈ¿ª ∑£¥˝¿∏∑Œ Ω∫∆˘
-    {
-        
-
-        for (int i = 0; i < 20; i++)
-        {
-
-            if (i != 0)
-            {
-                if (Random.Range(0, 2) == 0) // øﬁ¬ ¿Ã 1
-                {
-                    state = State.rightDir;
-                }
-                else
-                {
-                    state = State.leftDir;
-                }
-            }
-
-            switch (state)
-            {
+    void StairsInit() {
+        for (int i = 0; i < 20; i++) {
+            switch (state) {
                 case State.start:
                     stairs[i].transform.position = startPos;
                     state = State.leftDir;
@@ -104,29 +74,17 @@ public class GameManager : MonoBehaviour
                     stairs[i].transform.position = beforePos + rightPos;
                     break;
             }
-
             beforePos = stairs[i].transform.position;
 
-            
-
-            
-            if (i != 0)
-            {
+            if (i != 0) {
                 //Coin object activation according to random probability
-                if (Random.Range(1, 9) < 3) 
-                    objectManager.MakeObj("coin", i);
-                if (Random.Range(1, 9) < 3 && i < 19)
-                {
-                    if (state == State.leftDir) 
-                        state = State.rightDir;
-                    else if (state == State.rightDir) 
-                        state = State.leftDir;
-
+                if (Random.Range(1, 9) < 3) objectManager.MakeObj("coin", i);
+                if (Random.Range(1, 9) < 3 && i < 19) {
+                    if (state == State.leftDir) state = State.rightDir;
+                    else if (state == State.rightDir) state = State.leftDir;
                     IsChangeDir[i + 1] = true;
                 }
             }
-            
-            
         }
     }
 
@@ -134,13 +92,10 @@ public class GameManager : MonoBehaviour
 
 
     //Spawn The Stairs At The Random Location
-    void SpawnStair(int num) // Ω∫∆˘«“ «œ≥™¿« ∞Ë¥‹ ø¿∫Í¡ß∆Æ¿« ¿Œµ¶Ω∫∏¶ ∏≈∞≥∫Øºˆ∑Œ πﬁæ∆ ¿˚¿˝«— ¿ßƒ°ø° Ω∫∆˘
-    {
+    void SpawnStair(int num) {
         IsChangeDir[num + 1 == 20 ? 0 : num + 1] = false;
         beforePos = stairs[num == 0 ? 19 : num - 1].transform.position;
-        
-        switch (state)
-        {
+        switch (state) {
             case State.leftDir:
                 stairs[num].transform.position = beforePos + leftPos;
                 break;
@@ -149,131 +104,50 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
-        
         //Coin object activation according to random probability
         if (Random.Range(1, 9) < 3) objectManager.MakeObj("coin", num);
-        if (Random.Range(1, 9) < 3)
-        {
+        if (Random.Range(1, 9) < 3) {
             if (state == State.leftDir) state = State.rightDir;
             else if (state == State.rightDir) state = State.leftDir;
-            IsChangeDir[num + 1 == 20 ? 0 : num + 1] = true;
+            IsChangeDir[num+1 == 20? 0 : num+1] = true;
         }
-        
     }
 
 
 
     //Stairs Moving Along The Direction       
-    public void StairMove(int stairIndex, bool isChange, bool isleft) // «√∑π¿ÃæÓ∞° πˆ∆∞¿ª ¥©∏¶ ∂ß∏∂¥Ÿ ∞Ë¥‹¿« ¿ßƒ°∞° øÚ¡˜¿Ãµµ∑œ «‘
-    {
+    public void StairMove(int stairIndex, bool isChange, bool isleft) {
         if (player.isDie) return;
 
         //Move stairs to the right or left
-        for (int i = 0; i < 20; i++)
-        {
-            if (isleft)
-                stairs[i].transform.position += leftDir;
-            else 
-                stairs[i].transform.position += rightDir;
+        for (int i = 0; i < 20; i++) {
+            if (isleft) stairs[i].transform.position += leftDir;
+            else stairs[i].transform.position += rightDir;
         }
 
         //Move the stairs below a certain height
         for (int i = 0; i < 20; i++)
-            //if (stairs[i].transform.position.y < -5) SpawnStair(i);
-            if (stairs[i].transform.position.y < -10) 
-                SpawnStair(i);
+            if (stairs[i].transform.position.y < -5) SpawnStair(i);
 
         //Game over if climbing stairs is wrong
-        if (IsChangeDir[stairIndex] != isChange)
-        {
+        if(IsChangeDir[stairIndex] != isChange) {
             GameOver();
             return;
         }
 
-        /*
         //Score Update & Gauge Increase
         scoreText.text = (++score).ToString();
-        gauge.fillAmount += 0.7f;
+        gauge.fillAmount += 0.7f ;
         backGround.transform.position += backGround.transform.position.y < -14f ?
             new Vector3(0, 4.7f, 0) : new Vector3(0, -0.05f, 0);
-        */
     }
-
-
-
-    public void StairMoving()
-    {
-
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-
-            if (player.isleft)
-            {
-                for (int i = 0; i < 20; i++) 
-                    stairs[i].transform.position += leftDir;
-            }
-            else
-            {
-                for (int i = 0; i < 20; i++) 
-                    stairs[i].transform.position += rightDir;
-            }
-
-        }
-
-        /*
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            if (stairs[i].transform.position.y < -1)
-            {
-                for (int i = 0; i < 20; i++)
-                {
-                    SpawnStair(i);
-                }
-            }
-
-                for (int i = 0; i < 20; i++)
-            {
-                {
-                    if (stairs[i].transform.position.y < -1) SpawnStair(i);
-                }
-            }
-        }
-        */
-
-
-
-
-            for (int i = 0; i < 20; i++)
-        {
-
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                stairs[i].transform.position += leftDir;
-            }
-            else
-                stairs[i].transform.position += rightDir;
-
-        }
-
-        for (int i = 0; i < 20; i++)
-        {
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                if (stairs[i].transform.position.y < -1) SpawnStair(i);
-            }
-        }
-    }
-
-
 
 
     //#.Gauge
-    void GaugeReduce()
-    {
-        if (gaugeStart)
-        {
+    void GaugeReduce() {
+        if (gaugeStart) {
             //Gauge Reduction Rate Increases As Score Increases
-            if (score > 30) gaugeRedcutionRate = 0.0033f;
+            if (score > 30) gaugeRedcutionRate = 0.0025f; // 33
             if (score > 60) gaugeRedcutionRate = 0.0037f;
             if (score > 100) gaugeRedcutionRate = 0.0043f;
             if (score > 150) gaugeRedcutionRate = 0.005f;
@@ -286,43 +160,35 @@ public class GameManager : MonoBehaviour
     }
 
     
-    IEnumerator CheckGauge()
-    {
-        while (gauge.fillAmount != 0)
-        {
+    IEnumerator CheckGauge() {
+        while (gauge.fillAmount != 0) {
             yield return new WaitForSeconds(0.4f);
         }
         GameOver();
     }
 
-    
-    void GameOver()
-    {
+
+    void GameOver() {
         //Animation
         anim[0].SetBool("GameOver", true);
         player.anim.SetBool("Die", true);
 
         //UI
-        //ShowScore();
+        ShowScore();
         pauseBtn.SetActive(false);
 
         player.isDie = true;
         player.MoveAnimation();
-        //if (vibrationOn) Vibration();
-        //dslManager.SaveMoney(player.money);
+        if (vibrationOn) Vibration();
+        dslManager.SaveMoney(player.money);
 
         CancelInvoke();  //GaugeBar Stopped      
         Invoke("DisableUI", 1.5f);
     }
-    
 
 
-
-
-    /*
     //Show score after game over
-    void ShowScore()
-    {
+    void ShowScore() {
         finalScoreText.text = score.ToString();
         dslManager.SaveRankScore(score);
         bestScoreText.text = dslManager.GetBestScore().ToString();
@@ -331,27 +197,23 @@ public class GameManager : MonoBehaviour
         if (score == dslManager.GetBestScore() && score != 0)
             UI[2].SetActive(true);
     }
-    */
 
 
-    public void BtnDown(GameObject btn)
-    {
+
+    public void BtnDown(GameObject btn) {
         btn.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
-        if (btn.name == "ClimbBtn") player.Climb(false);
+        if (btn.name == "ClimbBtn")  player.Climb(false);
         else if (btn.name == "ChangeDirBtn") player.Climb(true);
     }
 
 
-    public void BtnUp(GameObject btn)
-    {
+    public void BtnUp(GameObject btn) {
         btn.transform.localScale = new Vector3(1f, 1f, 1f);
-        if (btn.name == "PauseBtn")
-        {
+        if (btn.name == "PauseBtn") {
             CancelInvoke();  //Gauge Stopped
             isGamePaused = true;
         }
-        if (btn.name == "ResumeBtn")
-        {
+        if (btn.name == "ResumeBtn") {
             GaugeReduce();
             isGamePaused = false;
         }
@@ -359,11 +221,8 @@ public class GameManager : MonoBehaviour
 
 
 
-
-    /*
     //#.Setting
-    public void SoundInit()
-    {
+    public void SoundInit() {
         selectedIndex = dslManager.GetSelectedCharIndex();
         player = players[selectedIndex].GetComponent<Player>();
         sound[3] = player.sound[0];
@@ -371,26 +230,22 @@ public class GameManager : MonoBehaviour
         sound[5] = player.sound[2];
     }
 
-    
-    public void SettingBtnInit()
-    {
+
+    public void SettingBtnInit() {
         bool on;
-        for (int i = 0; i < 2; i++)
-        {
+        for (int i = 0; i < 2; i++) {
             on = dslManager.GetSettingOn("BgmBtn");
             if (on) settingButtons[i].image.color = new Color(1, 1, 1, 1f);
             else settingButtons[i].image.color = new Color(1, 1, 1, 0.5f);
         }
 
-        for (int i = 2; i < 4; i++)
-        {
+        for (int i = 2; i < 4; i++) {
             on = dslManager.GetSettingOn("SoundBtn");
             if (on) settingButtons[i].image.color = new Color(1, 1, 1, 1f);
             else settingButtons[i].image.color = new Color(1, 1, 1, 0.5f);
         }
 
-        for (int i = 4; i < 6; i++)
-        {
+        for (int i = 4; i < 6; i++) {
             on = dslManager.GetSettingOn("VibrateBtn");
             if (on) settingButtons[i].image.color = new Color(1, 1, 1, 1f);
             else settingButtons[i].image.color = new Color(1, 1, 1, 0.5f);
@@ -398,50 +253,42 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public void SettingBtnChange(Button btn)
-    {
+    public void SettingBtnChange(Button btn) {
         bool on = dslManager.GetSettingOn(btn.name);
         if (btn.name == "BgmBtn")
-            for (int i = 0; i < 2; i++)
-            {
+            for (int i = 0; i < 2; i++) {
                 if (on) settingButtons[i].image.color = new Color(1, 1, 1, 1f);
                 else settingButtons[i].image.color = new Color(1, 1, 1, 0.5f);
             }
-        if (btn.name == "SoundBtn")
-        {
-            for (int i = 2; i < 4; i++)
-            {
+        if (btn.name == "SoundBtn") {
+            for (int i = 2; i < 4; i++) {               
                 if (on) settingButtons[i].image.color = new Color(1, 1, 1, 1f);
                 else settingButtons[i].image.color = new Color(1, 1, 1, 0.5f);
             }
         }
-        if (btn.name == "VibrateBtn")
-        {
-            for (int i = 4; i < 6; i++)
-            {
+        if (btn.name == "VibrateBtn") {
+            for (int i = 4; i < 6; i++) {
                 if (on) settingButtons[i].image.color = new Color(1, 1, 1, 1f);
                 else settingButtons[i].image.color = new Color(1, 1, 1, 0.5f);
             }
         }
     }
 
-    public void SettingOnOff(string type)
-    {
-        switch (type)
-        {
+    public void SettingOnOff(string type) {
+        switch (type) {
             case "BgmBtn":
                 if (dslManager.GetSettingOn(type)) { dontDestory.BgmPlay(); }
                 else dontDestory.BgmStop();
                 break;
             case "SoundBtn":
                 bool isOn = !dslManager.GetSettingOn(type);
-                for (int i = 0; i < sound.Length; i++)
+                for (int i = 0; i < sound.Length; i++) 
                     sound[i].mute = isOn;
                 break;
             case "VibrateBtn":
                 vibrationOn = dslManager.GetSettingOn(type);
                 break;
-        }
+        }       
     }
 
     void Vibration()
@@ -451,8 +298,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public void PlaySound(int index)
-    {
+    public void PlaySound(int index) {
         sound[index].Play();
     }
 
@@ -467,10 +313,8 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(i);
     }
 
-
-    private void OnApplicationQuit()
-    {
+    
+    private void OnApplicationQuit() {
         dslManager.SaveMoney(player.money);
-    }
-    */
+    }   
 }

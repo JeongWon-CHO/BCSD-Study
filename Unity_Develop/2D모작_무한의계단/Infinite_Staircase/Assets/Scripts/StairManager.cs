@@ -12,14 +12,13 @@ public class StairManager : MonoBehaviour
     private int currentStairIndex = 0;  // 현재 플레이어가 위치한 계단 인덱스
 
 
-    
-    
 
 
     private void Start()
     {
         // 초기 계단 생성
         CreateInitialStairs();
+        Debug.Log("StairManager 호출!");
     }
 
     private void Update()
@@ -41,7 +40,6 @@ public class StairManager : MonoBehaviour
             stairs[currentStairIndex] = newStair;
         }
 
-    
     }
 
     private void CreateInitialStairs()
